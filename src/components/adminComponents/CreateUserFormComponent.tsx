@@ -1,0 +1,164 @@
+'use client';
+
+import { useActionState, useEffect } from 'react';
+import { useFormStatus } from 'react-dom';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import { createUserAsAdmin } from '@/actions/admin.actions';
+import { UserPlus, User, Mail, Loader2, Building2, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
+
+const CreateUserForm = () => {
+  const router = useRouter();
+
+  const initialState = {
+    success: false,
+    message: '',
+    errors: []
+  };
+
+  const [state, formAction] = useActionState(createUserAsAdmin, initialState);
+
+  useEffect(() => {
+    if (state.success) {
+      if (state.message.includes('Password:')) {
+        const passwordMatch = state.message.match(/Password: (.+)$/);
+        if (passwordMatch) {
+          const password = passwordMatch[1];
+          navigator.clipboard.writeText(password);
+          toast.success('Password copied to clipboard!');
+        }
+      }
+      setTimeout(() => {
+        router.push('/admin');
+      }, 1500);
+    } else if (state.errors && state.errors.length > 0) {
+      state.errors.forEach(err => toast.error(err));
+    } else if (state.message) {
+      toast.error(state.message);
+    }
+  }, [state, router]);
+
+  function SubmitButton() {
+    const { pending } = useFormStatus();
+
+    return (
+      <button
+        type="submit"
+        disabled={pending}
+        className={`w-full font-semibold py-3 rounded-lg transition-all duration-300 flex items-center justify-center gap-2 mt-6 ${pending
+            ? "bg-emerald-400 cursor-not-allowed"
+            : "bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 hover:shadow-md"
+          } text-white`}
+      >
+        {pending ? (
+          <>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Creating Employee...</span>
+          </>
+        ) : (
+          <>
+            <UserPlus className="w-5 h-5 transition-transform group-hover:scale-110" />
+            <span>Create Employee</span>
+          </>
+        )}
+      </button>
+    );
+  }
+
+  return (
+    <div className='min-h-screen bg-linear-to-br from-emerald-50 via-white to-teal-50 p-8'>
+      <div className='max-w-md mx-auto'>
+        {/* Back Button */}
+        <Link
+          href='/admin'
+          className='inline-flex items-center gap-2 text-slate-600 hover:text-emerald-700 mb-8 transition'
+        >
+          <ArrowLeft className='w-5 h-5' />
+          Back to Admin
+        </Link>
+
+        {/* Card */}
+        <div className='bg-white border border-emerald-200 rounded-lg p-8 shadow-sm'>
+          {/* Header */}
+          <div className='text-center mb-8'>
+            <div className='flex justify-center mb-4'>
+              <div className='bg-linear-to-br from-emerald-600 to-teal-600 p-3 rounded-lg shadow-md'>
+                <UserPlus className='w-8 h-8 text-white' />
+              </div>
+            </div>
+            <h1 className='text-3xl font-bold mb-2 text-emerald-900'>Create New Employee</h1>
+            <p className='text-slate-600'>Add a new team member</p>
+          </div>
+
+          {/* Form */}
+          <form action={formAction} className='space-y-5'>
+            {/* Name Input */}
+            <div className='relative'>
+              <label className='block text-sm font-semibold text-slate-700 mb-2'>Full Name</label>
+              <div className='relative'>
+                <User className='absolute left-3 top-3.5 w-5 h-5 text-slate-400' />
+                <input
+                  className='w-full bg-emerald-50 border border-emerald-200 text-slate-900 placeholder-slate-500 px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition'
+                  type='text'
+                  name='name'
+                  placeholder='John Doe'
+                  autoComplete='name'
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Email Input */}
+            <div className='relative'>
+              <label className='block text-sm font-semibold text-slate-700 mb-2'>Email</label>
+              <div className='relative'>
+                <Mail className='absolute left-3 top-3.5 w-5 h-5 text-slate-400' />
+                <input
+                  className='w-full bg-emerald-50 border border-emerald-200 text-slate-900 placeholder-slate-500 px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition'
+                  type='email'
+                  name='email'
+                  placeholder='your@email.com'
+                  autoComplete='email'
+                  required
+                />
+              </div>
+            </div>
+
+
+
+            {/* Department Select */}
+            <div className='relative'>
+              <label className='block text-sm font-semibold text-slate-700 mb-2'>Department</label>
+              <div className='relative'>
+                <Building2 className='absolute left-3 top-3.5 w-5 h-5 text-slate-400 pointer-events-none z-10' />
+                <select
+                  className='w-full bg-emerald-50 border border-emerald-200 text-slate-900 px-4 py-3 pl-10 rounded-lg focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-200 transition appearance-none cursor-pointer'
+                  name='department'
+                  required
+                >
+                  <option value='' className='bg-white text-slate-500'>Select department</option>
+                  <option value='Sales' className='bg-white'>Sales</option>
+                  <option value='IT' className='bg-white'>IT</option>
+                  <option value='HR' className='bg-white'>HR</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <SubmitButton />
+          </form>
+
+          {/* Footer */}
+          <div className='mt-6 text-center'>
+            <p className='text-slate-600 text-sm'>
+              New employee will be created with secure password encryption
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CreateUserForm;

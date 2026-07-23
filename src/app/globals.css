@@ -1,0 +1,47 @@
+@import 'tailwindcss';
+
+:root {
+  --background: #eff6ff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide {
+  animation: slideUp 0.6s ease-in forwards;
+  animation-delay: 0.2s;
+}
+
+/* MOBILE ONLY (max-width: 480px) */
+@media (max-width: 480px) {
+  html {
+    font-size: 12px; /* Makes everything smaller */
+  }
+
+  body {
+    zoom: 0.9; /* Light scale effect */
+  }
+}
